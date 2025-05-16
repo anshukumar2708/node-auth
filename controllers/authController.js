@@ -64,7 +64,6 @@ exports.SendVerificationEmail = async (req, res) => {
     if (!existingUser) {
       return res.json({ status: "fail", message: "invalid user" });
     }
-    console.log("existingUser", existingUser);
     const otp = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
     const otpExpired = new Date(Date.now() + 30 * 60 * 1000);
     existingUser.otp = otp;

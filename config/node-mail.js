@@ -18,9 +18,16 @@ const SendEmail = async (email, otp) => {
     const info = await transporter?.sendMail({
       from: process.env.SMTP_USER,
       to: email,
-      subject: "Hello",
-      text: `otp is ${otp}`,
-      html: "<b>Hello world?</b>",
+      subject: "Email Verification - OTP",
+      text: `Your OTP for verification is: ${otp}`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Email Verification</h2>
+          <p>Your OTP is:</p>
+          <h1 style="color: #2e6c80;">${otp}</h1>
+          <p>This OTP will expire in 60 minutes.</p>
+        </div>
+      `,
     });
   } catch (error) {
     console.log("email send error", error);
