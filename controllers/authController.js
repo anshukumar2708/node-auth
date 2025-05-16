@@ -1,6 +1,7 @@
 const userModel = require("../models/usersModel");
 const bcrypt = require("bcryptjs");
 const createJwt = require("../config/jwt");
+const SendEmail = require("../config/node-mail");
 
 exports.RegisterUser = async (req, res) => {
   try {
@@ -40,6 +41,8 @@ exports.RegisterUser = async (req, res) => {
     const userObj = userData.toObject();
     delete userObj.password;
     delete userObj.__v;
+
+    await SendEmail(email);
 
     res.status(201).json({
       status: "success",
@@ -115,11 +118,10 @@ exports.ChangePassword = async (req, res) => {
       current_password,
       currentUser?.password
     );
-    console.log("isPassMatch", isPassMatch);
     if (!isPassMatch) {
       return res
         .status(401)
-        .json({ status: "fail", message: "Current password not match" });
+        .json({ status: "fail", message: "email & password not correct" });
     }
     const hashPassword = await bcrypt.hash(String(new_password), 10);
     await userModel.findByIdAndUpdate(req.user.userID, {
