@@ -7,6 +7,8 @@ const Router = express.Router();
 Router.post("/change-password", AuthMiddleware);
 
 Router.post("/register", AuthController.RegisterUser);
+Router.post("/send-verification-email", AuthController.SendVerificationEmail);
+Router.post("/verify-email", AuthController.verifyEmail);
 Router.post("/sign_in", AuthController.SignInUser);
 
 // protected routes

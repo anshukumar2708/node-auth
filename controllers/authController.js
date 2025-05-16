@@ -42,8 +42,6 @@ exports.RegisterUser = async (req, res) => {
     delete userObj.password;
     delete userObj.__v;
 
-    await SendEmail(email);
-
     res.status(201).json({
       status: "success",
       message: "Registration Successful",
@@ -53,6 +51,59 @@ exports.RegisterUser = async (req, res) => {
   } catch (error) {
     console.error("Register Error:", error);
     res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.SendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.json({ status: "fail", message: "email is required" });
+    }
+    const existingUser = await userModel.findOne({ email });
+    if (!existingUser) {
+      return res.json({ status: "fail", message: "invalid user" });
+    }
+    console.log("existingUser", existingUser);
+    const otp = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+    const otpExpired = new Date(Date.now() + 30 * 60 * 1000);
+    existingUser.otp = otp;
+    existingUser.otpExpired = otpExpired;
+    await existingUser.save();
+    await SendEmail(email, otp);
+    return res.json({ status: "success", message: "email send successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: "fail", message: "internal server error" });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.json({ status: "fail", message: "all fields are required" });
+    }
+    const existingUser = await userModel.findOne({ email });
+    if (!existingUser) {
+      return res.json({ status: "fail", message: "invalid user" });
+    }
+    if (existingUser.otp !== otp) {
+      return res.json({ status: "fail", message: "otp is not valid" });
+    }
+    if (new Date() > existingUser.otpExpired) {
+      return res.json({ status: "fail", message: "otp expire" });
+    }
+    existingUser.isEmailVerified = true;
+    existingUser.otp = null;
+    existingUser.otpExpires = null;
+    existingUser.save();
+    return res.json({ status: "success", message: "otp verify successful" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: "fail", message: "internal server error" });
   }
 };
 

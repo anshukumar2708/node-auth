@@ -13,13 +13,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const SendEmail = async (email) => {
+const SendEmail = async (email, otp) => {
   try {
     const info = await transporter?.sendMail({
       from: process.env.SMTP_USER,
       to: email,
       subject: "Hello",
-      text: "Hello world?",
+      text: `otp is ${otp}`,
       html: "<b>Hello world?</b>",
     });
   } catch (error) {
